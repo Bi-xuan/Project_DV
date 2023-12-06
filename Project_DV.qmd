@@ -1,0 +1,297 @@
+---
+title: "Project_DV"
+format: html
+---
+
+# Dataset
+
+Current Source: Eurostat <https://statistiques.public.lu/en.html>
+https://lustat.statec.lu/vis?fs[0]=Th%C3%A8mes%2C1%7CPopulation%20et%20emploi%23B%23%7CMarch%C3%A9%20du%20travail%23B5%23&pg=0&fc=Th%C3%A8mes&df[ds]=ds-release&df[id]=DF_B3010&df[ag]=LU1&df[vs]=1.0&pd=2015-01%2C2022-12&dq=M.&ly[cl]=SPECIFICATION&ly[rw]=TIME_PERIOD&lo=12
+
+Original Source: Data collected from the labor market
+
+Description: Employment and unemployment per month
+
+This is a monthly data collected from 1995.01 to 2023.08, containing
+information about labour market in Luxembourg. For example, it contains
+number of unemployment, number of active population, number of self
+employment, etc.
+
+# Import Data
+
+For simplification, the column names are transfered as follows: Time
+period - DATE Resident borderers - RB Non-resident borderers - NRB
+National wage-earners - NWE Domestic wage-earners - DWE National
+self-employment - NSE Domestic self-employment - DSE National
+employment - NE Domestic employment - DE Number of unemployed - NUE Active
+population - AP
+
+```{r}
+# Load libraries
+library(openxlsx)
+
+# Set working directory
+setwd("/Users/liubixuan/Documents/Data_Visualization/Project_DV")
+
+# Import Excel file data
+df <- read.xlsx("data.xlsx")
+
+# Rename columns
+colnames(df) <- c("Date", "Resident borderers", "Non-resident borderers", "National wage-earners", "Domestic wage-earners", "National self-employment", "Domestic self-employment", "National employment", "Domestic employment", "Number of unemployed", "Active population")
+
+# Convert date column to Date format
+df$Date <- as.numeric(df$Date)
+df$Date <- as.Date(df$Date, origin = "1899-12-30")
+
+# Show first 10 rows
+head(df, n = 10)
+```
+
+# Heatmap
+
+## Basic Heatmap
+
+```{r}
+# Import libraries
+library(ggplot2)
+library(reshape2)
+
+# Set the theme
+theme_set(theme_bw( base_size = 15))
+
+# Heatmap
+cormat <- round(cor(df[,-1]),2)    # Delete the DATE column
+melted_cormat <- melt(cormat)
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile(color = "white") + 
+  labs(x = NULL, y = NULL, fill = "Correlation") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Improvements
+
+```{r}
+cormat <- round(cor(df[,-1]),2)    # Delete the DATE column
+melted_cormat <- melt(cormat)
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile(color = "white") + 
+  scale_fill_gradient2(limits = c(0.8, 1), low = "white", mid = "yellow", high = "red", midpoint = 0.9) + 
+  labs(x = NULL, y = NULL, fill = "Correlation") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+Plot only the upper triangle.
+```{r}
+get_lower_tri<-function(cormat){
+    cormat[upper.tri(cormat)] <- NA
+    return(cormat)
+  }
+
+lower_tri <- get_lower_tri(cormat)
+melted_cormat <- melt(lower_tri, na.rm = TRUE)
+
+ggheatmap <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile(color = "white") + 
+  scale_fill_gradient2(limits = c(0.8, 1), low = "white", mid = "yellow", high = "red", midpoint = 0.9) + 
+  labs(x = NULL, y = NULL, fill = "Correlation")
+
+ggheatmap + 
+geom_text(aes(Var1, Var2, label = value), color = "black", size = 4) +
+theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.border = element_blank(),
+  panel.background = element_blank(),
+  axis.ticks = element_blank(),
+  legend.justification = c(1, 0),
+  legend.position = c(0.45, 0.70),
+  legend.direction = "horizontal")+
+  guides(fill = guide_colorbar(barwidth = 10, barheight = 1,
+                title.position = "top", title.hjust = 0.5)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+This final output is great!
+
+# Line Graph
+
+## Line Graph for all data
+
+```{r}
+df_rs <- read.xlsx("data_reshaped.xlsx")
+
+# Rename columns
+colnames(df_rs) <- c("Category", "Date","Value")
+
+# Convert date column to Date format
+df_rs$Date <- as.numeric(df_rs$Date)
+df_rs$Date <- as.Date(df_rs$Date, origin = "1899-12-30")
+
+# Show first 10 rows
+head(df_rs, n = 10)
+```
+
+```{r}
+ggplot(df_rs, aes(x = Date, y = Value)) + 
+  geom_line(aes(color = Category)) + 
+  labs(x = NULL, 
+       y = NULL, 
+       color = NULL)
+```
+
+```{r}
+library(dplyr)
+library(ggrepel)
+data_ends <- df_rs |> filter(Date == "2023-08-01")
+
+ggplot(df_rs, aes(x = Date, y = Value, color = Category, group = Category)) +
+  geom_line() +
+  geom_text_repel(
+    aes(label = Category), data = data_ends, nudge_x = 0.35, size = 3
+    ) + 
+  theme(legend.position = "none")
+```
+
+## Small Multiples
+
+```{r}
+df_rs |>
+  ggplot(aes(x = as.factor(Date), y = Value, colour = Category)) + 
+  geom_line(aes( group = Category)) +
+  labs(title = "Line Plot of All Categories",
+       subtitle = "x axis: Date(Monthly)",
+       fill = NULL,
+       x = NULL,
+       y = NULL) +
+  facet_wrap(vars(Category), nrow = 4, scales = "free_y") +
+  theme(legend.position = "none", 
+        text = element_text(size = 13))
+```
+
+## Unemployment Rates
+
+But mainly, we are interested in Unemployment Rates.
+Unemployment rates = Number of unemployment / Active population
+
+```{r}
+# Calculate Unemployment rates
+df_ur <- data.frame(
+  Category = rep("Unemployment rate", 344),
+  Date = df_rs[1:344, 2],
+  Value = df_rs |> 
+    filter(Category == "Number of unemployed") |>
+    select(Value) / df_rs |>
+    filter(Category == "Active population") |>
+    select(Value)
+)
+
+df_rs <- rbind(df_rs, df_ur)
+
+# Plot of Unemployment rate
+df_rs |> 
+  filter(Category == "Unemployment rate") |>
+  ggplot(aes(x = Date, y = Value)) + 
+  geom_line(color = "red") + 
+  geom_smooth() + 
+  labs(title = "Line Plot of Unemployment Rates",
+       x = NULL,
+       y = NULL) +
+  theme(legend.position = "none")
+
+
+```
+```{r}
+# Plot with NUE & AP
+df_rs |> 
+  filter(Category %in% c("Number of unemployed", "Active population")) |>
+  ggplot(aes(x = Date, y = Value, color = Category)) + 
+  geom_line() +
+  labs(title = "Line Plot of Active Population & Number of Unemployed",
+       x = NULL,
+       y = NULL) + 
+  theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
+```
+
+# Bar Plot
+
+## National Employment & Domestic Employment
+
+```{r}
+library(lubridate)
+library(tidyr)
+
+df |>
+  pivot_longer(
+    cols = c(
+      "Non-resident borderers",
+      "National employment",
+      "Domestic employment"
+    ),
+    names_to = "Categories",
+    values_to = "Values"
+  ) |>
+  filter(year(Date) == 2023) -> df_rs_select
+
+ggplot(df_rs_select) +
+  geom_col(aes(x = Date,
+               y = Values,
+               fill = Categories)) + 
+  labs(title = "Proportion of National Employment of 2023", 
+       x = NULL,
+       y = NULL) + 
+  theme(legend.position = "top",
+        legend.direction = "horizontal",
+        legend.box = "horizontal")
+```
+
+Do the same thing annually.
+Annual data is represented by the data captured at the end of December of each year.
+```{r}
+# Create a new data frame containing annual data.
+df |>
+  pivot_longer(
+    cols = c(
+      "Non-resident borderers",
+      "National employment",
+      "Domestic employment"
+    ),
+    names_to = "Categories",
+    values_to = "Values"
+  ) |>
+  filter(month(Date) == 12) -> df_an
+
+ggplot(df_an) +
+  geom_col(aes(x = Date,
+               y = Values,
+               fill = Categories)) + 
+  labs(title = "Proportion of annual National Employment, 1995-2023", 
+       x = NULL,
+       y = NULL) + 
+  theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
+```
+
+# Scatter Plot
+
+Now we plot the relationship between Domestic employment and National employment.
+```{r}
+mdl <- lm(`National employment` ~ `Domestic employment`, data = df)
+slope <- coef(mdl)[2]
+
+df |> 
+  ggplot(aes(x = `Domestic employment`, y = `National employment`)) +
+  geom_point(color = "red", size = 0.8) +
+  geom_smooth(method = "lm", se = TRUE) +  # Add linear regression line
+  annotate("text", x = max(df$`Domestic employment`) - 10000, y = max(df$`National employment`), 
+           label = paste("Slope: ", round(slope, 3)),
+           hjust = 1, vjust = 1) +
+  labs(x = "Domestic employment",
+       y = "National employment")
+```
+
+# Future Directions
+
+- Distribution
+- Calendar Plot
+- Suggestions from the audience

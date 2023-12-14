@@ -151,6 +151,7 @@ ggplot(df_rs, aes(x = Date, y = Value, color = Category, group = Category)) +
   geom_text_repel(
     aes(label = Category), data = data_ends, nudge_x = 0.35, size = 3
     ) + 
+  labs(title = "Labor Market of Luxembourg",x=NULL, y=NULL) + 
   theme(legend.position = "none")
 ```
 
@@ -160,7 +161,7 @@ ggplot(df_rs, aes(x = Date, y = Value, color = Category, group = Category)) +
 df_rs |>
   ggplot(aes(x = as.factor(Date), y = Value, colour = Category)) + 
   geom_line(aes( group = Category)) +
-  labs(title = "Line Plot of All Categories",
+  labs(title = "Labor Market of Luxembourg",
        subtitle = "x axis: Date(Monthly)",
        fill = NULL,
        x = NULL,
@@ -195,7 +196,7 @@ df_rs |>
   ggplot(aes(x = Date, y = Value)) + 
   geom_line(color = "red") + 
   geom_smooth() + 
-  labs(title = "Line Plot of Unemployment Rates",
+  labs(title = "Unemployment Rates of Luxembourg",
        x = NULL,
        y = NULL) +
   theme(legend.position = "none")
@@ -208,11 +209,26 @@ df_rs |>
   filter(Category %in% c("Number of unemployed", "Active population")) |>
   ggplot(aes(x = Date, y = Value, color = Category)) + 
   geom_line() +
-  labs(title = "Line Plot of Active Population & Number of Unemployed",
+  labs(title = "Active Population & Number of Unemployed",
        x = NULL,
-       y = NULL) + 
+       y = NULL,
+       color = NULL) + 
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
+Improve y scaling.
+```{r}
+df |> 
+  ggplot(aes(x = Date)) + 
+  geom_line(aes(y = `Number of unemployed`), color = "blue") + 
+  geom_line(aes(y = `Active population` * 0.05), color = "red") + 
+  labs(title = "Active Population & Number of Unemployed",
+       x = NULL,
+       y = NULL,
+       color = NULL) + 
+  scale_y_continuous(name = "Number of Unemployed(Blue)", sec.axis = sec_axis(~.*20, name = "Active Population(Red)")) + 
+  theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
+```
+
 
 # Bar Plot
 
@@ -240,7 +256,8 @@ ggplot(df_rs_select) +
                fill = Categories)) + 
   labs(title = "Proportion of National Employment of 2023", 
        x = NULL,
-       y = NULL) + 
+       y = NULL,
+       fill = NULL) + 
   theme(legend.position = "top",
         legend.direction = "horizontal",
         legend.box = "horizontal")
@@ -268,9 +285,40 @@ ggplot(df_an) +
                fill = Categories)) + 
   labs(title = "Proportion of annual National Employment, 1995-2023", 
        x = NULL,
-       y = NULL) + 
+       y = NULL,
+       fill = NULL) + 
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
+Plot the proportion.
+```{r}
+df$`Other employment` <- df$`Domestic employment` - df$`National employment`
+
+df$`Other Employment` <- df$`Other employment` / df$`Domestic employment` *100
+df$`National Employment` <- 100 - df$`Other Employment`
+
+df |>
+  pivot_longer(
+    cols = c(
+      "Other Employment",
+      "National Employment"
+    ),
+    names_to = "Categories",
+    values_to = "Values"
+  ) |>
+  filter(month(Date) == 12) -> df_an
+
+df_an |>
+  ggplot() +
+  geom_col(aes(x = Date,
+               y = Values,
+               fill = Categories)) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # Format y-axis as percentage
+  labs(title = "Proportion of National Employment",
+       y = NULL,
+       x = NULL,
+       fill = NULL)
+```
+
 
 # Scatter Plot
 
@@ -290,8 +338,30 @@ df |>
        y = "National employment")
 ```
 
-# Future Directions
+# Distribution
 
-- Distribution
-- Calendar Plot
-- Suggestions from the audience
+```{r}
+# Box Plot
+df$`Unemployment rate` <- df$`Number of unemployed` / df$`Active population`
+
+df |> 
+  ggplot(aes(as.factor(year(Date)),  `Unemployment rate`)) + 
+  geom_boxplot() + 
+  scale_x_discrete(breaks = unique(as.factor(seq(floor(min(year(df$Date))), ceiling(max(year(df$Date))), by = 5)))) + 
+  labs(title = "Unemployment Rate in Luxembourg", 
+       x = NULL, 
+       y = NULL)
+```
+```{r}
+# Beeswarm Plot
+library(ggbeeswarm)
+df |> 
+  ggplot(aes(as.factor(year(Date)),  `Unemployment rate`)) +
+    geom_violin() +
+    geom_beeswarm(size = 0.5, colour = "#DC021B") + 
+  scale_x_discrete(breaks = unique(as.factor(seq(floor(min(year(df$Date))), ceiling(max(year(df$Date))), by = 5)))) + 
+  labs(title = "Unemployment Rate in Luxembourg", 
+       x = NULL, 
+       y = NULL)
+```
+

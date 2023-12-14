@@ -1,0 +1,56 @@
+################################Completed#################################
+Heatmap
+Line graph for all data
+Improve Labeling
+Small multiples
+Bar Plot: maybe with proportions
+Plot the year 2023
+Do the proportion thing annually
+
+
+################################To be Completed###########################
+
+Distributions: 
+Study the distribution of one category
+ECDF
+QQ plot
+
+Box plot
+
+Correlation Heatmap
+
+Proportions
+(With 50% line in the middle)
+
+This kind of plot:
+* - @ - $
+x: percentage
+y: category
+
+Pie charts
+
+Remove excessive ink such as "Line Plot", "Categories".
+Rescale the line plot with two lines, which one of them is a subset of the other.
+
+###############################Other Posssible Ways########################
+Calendar Plot
+
+
+###############################Final Project##############################
+Only ggplot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

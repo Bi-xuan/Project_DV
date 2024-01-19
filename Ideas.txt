@@ -32,6 +32,11 @@ Pie charts
 Remove excessive ink such as "Line Plot", "Categories".
 Rescale the line plot with two lines, which one of them is a subset of the other.
 
+Remove the seasonal effects: Moving Average Plot
+Put the explanatory plot side by side with the original plot
+Change the labeling in the line plot, make a legend
+You can use notes in Quarto
+
 ###############################Other Posssible Ways########################
 Calendar Plot
 

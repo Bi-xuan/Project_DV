@@ -19,19 +19,9 @@ employment, etc.
 
 # Import Data
 
-For simplification, the column names are transfered as follows: Time
-period - DATE Resident borderers - RB Non-resident borderers - NRB
-National wage-earners - NWE Domestic wage-earners - DWE National
-self-employment - NSE Domestic self-employment - DSE National
-employment - NE Domestic employment - DE Number of unemployed - NUE Active
-population - AP
-
 ```{r}
 # Load libraries
 library(openxlsx)
-
-# Set working directory
-setwd("/Users/liubixuan/Documents/Data_Visualization/Project_DV")
 
 # Import Excel file data
 df <- read.xlsx("data.xlsx")
@@ -49,8 +39,6 @@ head(df, n = 10)
 
 # Heatmap
 
-## Basic Heatmap
-
 ```{r}
 # Import libraries
 library(ggplot2)
@@ -59,35 +47,12 @@ library(reshape2)
 # Set the theme
 theme_set(theme_bw( base_size = 15))
 
-# Heatmap
-cormat <- round(cor(df[,-1]),2)    # Delete the DATE column
-melted_cormat <- melt(cormat)
-ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
-  geom_tile(color = "white") + 
-  labs(x = NULL, y = NULL, fill = "Correlation") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-## Improvements
-
-```{r}
-cormat <- round(cor(df[,-1]),2)    # Delete the DATE column
-melted_cormat <- melt(cormat)
-ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
-  geom_tile(color = "white") + 
-  scale_fill_gradient2(limits = c(0.8, 1), low = "white", mid = "yellow", high = "red", midpoint = 0.9) + 
-  labs(x = NULL, y = NULL, fill = "Correlation") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-
-Plot only the upper triangle.
-```{r}
 get_lower_tri<-function(cormat){
     cormat[upper.tri(cormat)] <- NA
     return(cormat)
   }
 
+cormat <- round(cor(df[,-1]),2)    # Delete the DATE column
 lower_tri <- get_lower_tri(cormat)
 melted_cormat <- melt(lower_tri, na.rm = TRUE)
 
@@ -112,8 +77,6 @@ theme(
                 title.position = "top", title.hjust = 0.5)) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-
-This final output is great!
 
 # Line Graph
 
@@ -203,19 +166,7 @@ df_rs |>
 
 
 ```
-```{r}
-# Plot with NUE & AP
-df_rs |> 
-  filter(Category %in% c("Number of unemployed", "Active population")) |>
-  ggplot(aes(x = Date, y = Value, color = Category)) + 
-  geom_line() +
-  labs(title = "Active Population & Number of Unemployed",
-       x = NULL,
-       y = NULL,
-       color = NULL) + 
-  theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
-```
-Improve y scaling.
+
 ```{r}
 df |> 
   ggplot(aes(x = Date)) + 
@@ -225,19 +176,15 @@ df |>
        x = NULL,
        y = NULL,
        color = NULL) + 
-  scale_y_continuous(name = "Number of Unemployed(Blue)", sec.axis = sec_axis(~.*20, name = "Active Population(Red)")) + 
+  scale_y_continuous(name = "Number of Unemployed", sec.axis = sec_axis(~.*20, name = "Active Population")) + 
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
-
 
 # Bar Plot
 
 ## National Employment & Domestic Employment
 
 ```{r}
-library(lubridate)
-library(tidyr)
-
 df |>
   pivot_longer(
     cols = c(
@@ -266,6 +213,9 @@ ggplot(df_rs_select) +
 Do the same thing annually.
 Annual data is represented by the data captured at the end of December of each year.
 ```{r}
+library(lubridate)
+library(tidyr)
+
 # Create a new data frame containing annual data.
 df |>
   pivot_longer(
@@ -289,36 +239,6 @@ ggplot(df_an) +
        fill = NULL) + 
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
-Plot the proportion.
-```{r}
-df$`Other employment` <- df$`Domestic employment` - df$`National employment`
-
-df$`Other Employment` <- df$`Other employment` / df$`Domestic employment` *100
-df$`National Employment` <- 100 - df$`Other Employment`
-
-df |>
-  pivot_longer(
-    cols = c(
-      "Other Employment",
-      "National Employment"
-    ),
-    names_to = "Categories",
-    values_to = "Values"
-  ) |>
-  filter(month(Date) == 12) -> df_an
-
-df_an |>
-  ggplot() +
-  geom_col(aes(x = Date,
-               y = Values,
-               fill = Categories)) +
-  scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # Format y-axis as percentage
-  labs(title = "Proportion of National Employment",
-       y = NULL,
-       x = NULL,
-       fill = NULL)
-```
-
 
 # Scatter Plot
 
@@ -353,15 +273,19 @@ df |>
        y = NULL)
 ```
 ```{r}
-# Beeswarm Plot
-library(ggbeeswarm)
-df |> 
-  ggplot(aes(as.factor(year(Date)),  `Unemployment rate`)) +
-    geom_violin() +
-    geom_beeswarm(size = 0.5, colour = "#DC021B") + 
-  scale_x_discrete(breaks = unique(as.factor(seq(floor(min(year(df$Date))), ceiling(max(year(df$Date))), by = 5)))) + 
-  labs(title = "Unemployment Rate in Luxembourg", 
-       x = NULL, 
-       y = NULL)
-```
+# Box Plot
+df$`Unemployment rate` <- df$`Number of unemployed` / df$`Active population`
 
+df |> 
+  ggplot(aes(x = cut(Date, breaks = "5 years"), y = `Unemployment rate`, group = cut(Date, breaks = "5 years"))) + 
+  geom_boxplot() + 
+  scale_x_discrete(labels = function(x) {
+    interval_start <- as.Date(x, format = "%Y-%m-%d")
+    interval_end <- interval_start + lubridate::years(5) - lubridate::days(1)
+    sprintf("%s - %s", format(interval_start, "%Y"), format(interval_end, "%Y"))
+  }) +
+  labs(title = "Unemployment Rate in Luxembourg", 
+       x = "Year Interval", 
+       y = "Unemployment Rate")
+```
+This takes out the seasonal effects.

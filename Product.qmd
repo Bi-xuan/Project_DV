@@ -184,34 +184,6 @@ df |>
 
 ## National Employment & Domestic Employment
 
-```{r}
-library(tidyr)
-df |>
-  pivot_longer(
-    cols = c(
-      "Non-resident borderers",
-      "National employment",
-      "Domestic employment"
-    ),
-    names_to = "Categories",
-    values_to = "Values"
-  ) |>
-  filter(year(Date) == 2023) -> df_rs_select
-
-ggplot(df_rs_select) +
-  geom_col(aes(x = Date,
-               y = Values,
-               fill = Categories)) + 
-  labs(title = "Proportion of National Employment of 2023", 
-       x = NULL,
-       y = NULL,
-       fill = NULL) + 
-  theme(legend.position = "top",
-        legend.direction = "horizontal",
-        legend.box = "horizontal")
-```
-
-Do the same thing annually.
 Annual data is represented by the data captured at the end of December of each year.
 ```{r}
 library(lubridate)
@@ -261,18 +233,6 @@ df |>
 
 # Distribution
 
-```{r}
-# Box Plot
-df$`Unemployment rate` <- df$`Number of unemployed` / df$`Active population`
-
-df |> 
-  ggplot(aes(as.factor(year(Date)),  `Unemployment rate`)) + 
-  geom_boxplot() + 
-  scale_x_discrete(breaks = unique(as.factor(seq(floor(min(year(df$Date))), ceiling(max(year(df$Date))), by = 5)))) + 
-  labs(title = "Unemployment Rate in Luxembourg", 
-       x = NULL, 
-       y = NULL)
-```
 ```{r}
 # Box Plot
 df$`Unemployment rate` <- df$`Number of unemployed` / df$`Active population`

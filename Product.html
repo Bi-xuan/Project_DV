@@ -10,6 +10,8 @@
 <link href="Product_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.3.450">
 
+  <meta name="author" content="Bixuan LIU">
+  <meta name="dcterms.date" content="2024-02-25">
   <title>Employment in Luxembourg</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -318,6 +320,9 @@
       margin-right: 0; 
     }
   </style>
+  
+  <script src="Product_files/libs/kePrint-0.0.1/kePrint.js"></script>
+  <link href="Product_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -327,69 +332,134 @@
   <h1 class="title">Employment in Luxembourg</h1>
 
 <div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Bixuan LIU 
+</div>
+</div>
 </div>
 
+  <p class="date">2024-02-25</p>
 </section>
-<section id="dataset" class="title-slide slide level1 center">
-<h1>Dataset</h1>
-<p>Current Source: Eurostat <a href="https://statistiques.public.lu/en.html" class="uri">https://statistiques.public.lu/en.html</a> https://lustat.statec.lu/vis?fs[0]=Th%C3%A8mes%2C1%7CPopulation%20et%20emploi%23B%23%7CMarch%C3%A9%20du%20travail%23B5%23&amp;pg=0&amp;fc=Th%C3%A8mes&amp;df[ds]=ds-release&amp;df[id]=DF_B3010&amp;df[ag]=LU1&amp;df[vs]=1.0&amp;pd=2015-01%2C2022-12&amp;dq=M.&amp;ly[cl]=SPECIFICATION&amp;ly[rw]=TIME_PERIOD&amp;lo=12</p>
-<p>Original Source: Data collected from the labor market</p>
-<p>Description: Employment and unemployment per month</p>
-<p>This is a monthly data collected from 1995.01 to 2023.08, containing information about labour market in Luxembourg. For example, it contains number of unemployment, number of active population, number of self employment, etc.</p>
-</section>
-
-<section id="import-data" class="title-slide slide level1 center">
-<h1>Import Data</h1>
+<section id="dataset" class="slide level2">
+<h2>Dataset</h2>
+<p><strong>Current Source</strong>: Eurostat <a href="https://statistiques.public.lu/en.html" class="uri">https://statistiques.public.lu/en.html</a></p>
+<p><strong>Original Source</strong>: Data collected from the labor market</p>
+<p><strong>Type</strong>: Monthly (1995.01-2023.08)</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>         Date Resident borderers Non-resident borderers National wage-earners
-1  1995-01-01           8513.629               53011.24              149885.4
-2  1995-02-01           8581.829               53403.45              150288.6
-3  1995-03-01           8643.488               54013.79              150700.8
-4  1995-04-01           8698.606               54550.09              150609.9
-5  1995-05-01           8747.183               55239.47              151076.1
-6  1995-06-01           8789.219               55824.79              152903.3
-7  1995-07-01           8824.713               56373.09              153579.9
-8  1995-08-01           8853.666               56548.19              152757.7
-9  1995-09-01           8876.078               56766.31              156121.1
-10 1995-10-01           8891.949               57103.50              155936.3
-   Domestic wage-earners National self-employment Domestic self-employment
-1               194383.0                 16793.75                 17341.52
-2               195110.3                 16783.79                 17338.56
-3               196071.1                 16793.58                 17355.34
-4               196461.4                 16846.05                 17424.80
-5               197568.4                 16866.50                 17456.25
-6               199938.8                 16857.51                 17456.25
-7               201128.3                 16844.90                 17453.65
-8               200452.2                 16836.26                 17442.01
-9               204011.3                 16839.99                 17452.73
-10              204147.8                 16869.77                 17492.51
-   National employment Domestic employment Number of unemployed
-1             166679.1            211724.5             4868.758
-2             167072.4            212448.8             4808.390
-3             167494.3            213426.4             4703.404
-4             167456.0            213886.2             4365.697
-5             167942.6            215024.7             4168.847
-6             169760.8            217395.1             4090.106
-7             170424.9            218582.0             4022.740
-8             169594.0            217894.2             4071.734
-9             172961.1            221464.1             4498.680
-10            172806.1            221640.3             4664.034
-   Active population
-1           171547.9
-2           171880.8
-3           172197.7
-4           171821.7
-5           172111.5
-6           173850.9
-7           174447.6
-8           173665.7
-9           177459.8
-10          177470.1</code></pre>
+<div class="cell-output-display">
+<table class="table table-striped table" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto; font-size: 15px; margin-left: auto; margin-right: auto;">
+<caption>First 5 Rows</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Date</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Resident borderers</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Non-resident borderers</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">National wage-earners</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Domestic wage-earners</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">National self-employment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1995-01-01</td>
+<td style="text-align: right;">8513.629</td>
+<td style="text-align: right;">53011.24</td>
+<td style="text-align: right;">149885.4</td>
+<td style="text-align: right;">194383.0</td>
+<td style="text-align: right;">16793.75</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1995-02-01</td>
+<td style="text-align: right;">8581.829</td>
+<td style="text-align: right;">53403.45</td>
+<td style="text-align: right;">150288.6</td>
+<td style="text-align: right;">195110.3</td>
+<td style="text-align: right;">16783.79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1995-03-01</td>
+<td style="text-align: right;">8643.488</td>
+<td style="text-align: right;">54013.79</td>
+<td style="text-align: right;">150700.8</td>
+<td style="text-align: right;">196071.1</td>
+<td style="text-align: right;">16793.58</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1995-04-01</td>
+<td style="text-align: right;">8698.606</td>
+<td style="text-align: right;">54550.09</td>
+<td style="text-align: right;">150609.9</td>
+<td style="text-align: right;">196461.4</td>
+<td style="text-align: right;">16846.05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1995-05-01</td>
+<td style="text-align: right;">8747.183</td>
+<td style="text-align: right;">55239.47</td>
+<td style="text-align: right;">151076.1</td>
+<td style="text-align: right;">197568.4</td>
+<td style="text-align: right;">16866.50</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+<div class="cell-output-display">
+<table class="table table-striped table" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto; font-size: 15px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Domestic self-employment</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">National employment</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Domestic employment</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Number of unemployed</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Active population</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">17341.52</td>
+<td style="text-align: right;">166679.1</td>
+<td style="text-align: right;">211724.5</td>
+<td style="text-align: right;">4868.758</td>
+<td style="text-align: right;">171547.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">17338.56</td>
+<td style="text-align: right;">167072.4</td>
+<td style="text-align: right;">212448.8</td>
+<td style="text-align: right;">4808.390</td>
+<td style="text-align: right;">171880.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">17355.34</td>
+<td style="text-align: right;">167494.3</td>
+<td style="text-align: right;">213426.4</td>
+<td style="text-align: right;">4703.404</td>
+<td style="text-align: right;">172197.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">17424.80</td>
+<td style="text-align: right;">167456.0</td>
+<td style="text-align: right;">213886.2</td>
+<td style="text-align: right;">4365.697</td>
+<td style="text-align: right;">171821.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">17456.25</td>
+<td style="text-align: right;">167942.6</td>
+<td style="text-align: right;">215024.7</td>
+<td style="text-align: right;">4168.847</td>
+<td style="text-align: right;">172111.5</td>
+</tr>
+</tbody>
+</table>
+
+
 </div>
 </div>
 </section>
-
 <section id="heatmap" class="title-slide slide level1 center">
 <h1>Heatmap</h1>
 

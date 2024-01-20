@@ -1,27 +1,24 @@
 ---
 title: "Employment in Luxembourg"
-format: revealjs
+author: "Bixuan LIU"
+date: "Feburary 25, 2024"
+format:
+  revealjs: 
+    theme: sky
 ---
 
-# Dataset
+## Dataset
 
-Current Source: Eurostat <https://statistiques.public.lu/en.html>
-https://lustat.statec.lu/vis?fs[0]=Th%C3%A8mes%2C1%7CPopulation%20et%20emploi%23B%23%7CMarch%C3%A9%20du%20travail%23B5%23&pg=0&fc=Th%C3%A8mes&df[ds]=ds-release&df[id]=DF_B3010&df[ag]=LU1&df[vs]=1.0&pd=2015-01%2C2022-12&dq=M.&ly[cl]=SPECIFICATION&ly[rw]=TIME_PERIOD&lo=12
+**Current Source**: Eurostat <https://statistiques.public.lu/en.html>
 
-Original Source: Data collected from the labor market
+**Original Source**: Data collected from the labor market
 
-Description: Employment and unemployment per month
-
-This is a monthly data collected from 1995.01 to 2023.08, containing
-information about labour market in Luxembourg. For example, it contains
-number of unemployment, number of active population, number of self
-employment, etc.
-
-# Import Data
-
+**Type**: Monthly (1995.01-2023.08)
 ```{r}
 # Load libraries
 library(openxlsx)
+library(knitr)
+library(kableExtra)
 
 # Import Excel file data
 df <- read.xlsx("data.xlsx")
@@ -34,10 +31,15 @@ df$Date <- as.numeric(df$Date)
 df$Date <- as.Date(df$Date, origin = "1899-12-30")
 
 # Show first 10 rows
-head(df, n = 10)
+kable(df[1:5, 1:6], format = "html", caption = "First 5 Rows", row.names = FALSE) |>
+  kable_styling("striped", full_width = FALSE) |>
+  kable_styling(font_size = 15)
+kable(df[1:5, 7:11], format = "html", row.names = FALSE) |>
+  kable_styling("striped", full_width = FALSE) |>
+  kable_styling(font_size = 15)
 ```
 
-# Heatmap
+# Correlations
 
 ```{r}
 # Import libraries

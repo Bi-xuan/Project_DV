@@ -9,7 +9,7 @@ format:
 
 ## Dataset
 
-**Current Source**: Eurostat <https://statistiques.public.lu/en.html>
+**Current Source**: [Eurostat](https://statistiques.public.lu/en.html)
 
 **Original Source**: Data collected from the labor market
 
@@ -39,7 +39,9 @@ kable(df[1:5, 7:11], format = "html", row.names = FALSE) |>
   kable_styling(font_size = 15)
 ```
 
-# Correlations
+# A First Glance
+
+## Correlations
 
 ```{r}
 # Import libraries
@@ -80,9 +82,9 @@ theme(
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-# Line Graph
+## Line Graph
 
-## Line Graph for all data
+[Shiny App](http://127.0.0.1:4328/)
 
 ```{r}
 df_rs <- read.xlsx("data_reshaped.xlsx")
@@ -136,6 +138,8 @@ df_rs |>
         text = element_text(size = 13))
 ```
 
+# Insights
+
 ## Unemployment Rates
 
 But mainly, we are interested in Unemployment Rates.
@@ -182,8 +186,6 @@ df |>
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
 
-# Bar Plot
-
 ## National Employment & Domestic Employment
 
 Annual data is represented by the data captured at the end of December of each year.
@@ -215,9 +217,6 @@ ggplot(df_an) +
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
 ```
 
-# Scatter Plot
-
-Now we plot the relationship between Domestic employment and National employment.
 ```{r}
 mdl <- lm(`National employment` ~ `Domestic employment`, data = df)
 slope <- coef(mdl)[2]
@@ -233,7 +232,7 @@ df |>
        y = "National employment")
 ```
 
-# Distribution
+## Distribution
 
 ```{r}
 # Box Plot

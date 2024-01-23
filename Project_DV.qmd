@@ -122,7 +122,8 @@ ggplot(df_rs, aes(x = Date, y = Value, color = Category, group = Category)) +
 
 ```{r}
 df_rs |>
-  ggplot(aes(x = as.factor(Date), y = Value, colour = Category)) + 
+  mutate(Date = as.Date(Date)) %>%
+  ggplot(aes(x = Date, y = Value, colour = Category)) + 
   geom_line(aes( group = Category)) +
   labs(title = "Labor Market of Luxembourg",
        subtitle = "x axis: Date(Monthly)",
@@ -130,15 +131,17 @@ df_rs |>
        x = NULL,
        y = NULL) +
   facet_wrap(vars(Category), nrow = 4, scales = "free_y") +
-  theme(legend.position = "none", 
-        text = element_text(size = 13))
+  scale_x_date(labels = scales::date_format("%Y")) + 
+  theme(strip.text = element_text(size = 10, face = "bold"),  
+        strip.background = element_blank(),  
+        legend.position = "none",  
+        axis.text = element_text(size = 10))
 ```
 
 ## Unemployment Rates
 
 But mainly, we are interested in Unemployment Rates.
 Unemployment rates = Number of unemployment / Active population
-
 ```{r}
 # Calculate Unemployment rates
 df_ur <- data.frame(
@@ -152,9 +155,13 @@ df_ur <- data.frame(
 )
 
 df_rs <- rbind(df_rs, df_ur)
+```
+
+```{r}
+library(gridExtra)
 
 # Plot of Unemployment rate
-df_rs |> 
+g1 <- df_rs |> 
   filter(Category == "Unemployment rate") |>
   ggplot(aes(x = Date, y = Value)) + 
   geom_line(color = "red") + 
@@ -164,20 +171,42 @@ df_rs |>
        y = NULL) +
   theme(legend.position = "none")
 
-
-```
-
-```{r}
-df |> 
+g2 <- df |> 
   ggplot(aes(x = Date)) + 
-  geom_line(aes(y = `Number of unemployed`), color = "blue") + 
-  geom_line(aes(y = `Active population` * 0.05), color = "red") + 
-  labs(title = "Active Population & Number of Unemployed",
+  geom_line(aes(y = `Number of unemployed`), color = "red") + 
+  labs(title = "Number of Unemployed",
        x = NULL,
        y = NULL,
-       color = NULL) + 
-  scale_y_continuous(name = "Number of Unemployed", sec.axis = sec_axis(~.*20, name = "Active Population")) + 
-  theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
+       color = NULL)
+
+g3 <- df |> 
+  ggplot(aes(x = Date)) + 
+  geom_line(aes(y = `Active population`), color = "blue") + 
+  labs(title = "Active Population",
+       x = NULL,
+       y = NULL,
+       color = NULL)
+
+cor_nue <- cor(df_rs[df_rs$Category== "Unemployment rate",3],df_rs[df_rs$Category== "Number of unemployed",3])
+cor_ac <- cor(df_rs[df_rs$Category== "Unemployment rate",3],df_rs[df_rs$Category== "Active population",3])
+df_cor <- data.frame(
+  Category = c("Active Population", "Number of Unemployed"),
+  cor = c(cor_ac, cor_nue)
+)
+g4 <- ggplot(df_cor, aes(x = Category, y = cor, fill = Category)) +
+  geom_col(width = 0.5) +
+  labs(title = "Correlation",
+       x = NULL,
+       y = NULL) + 
+   theme(legend.position = "none") +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  scale_fill_manual(values = c("Active Population" = "blue", "Number of Unemployed" = "red"))
+
+grid.arrange(
+  g1, g2, g3, g4,
+  layout_matrix = rbind(c(1,1,4), c(2,2,4), c(3,3,4)),  # Specify the layout matrix
+  ncol = 3
+)
 ```
 
 # Bar Plot
@@ -188,6 +217,7 @@ Annual data is represented by the data captured at the end of December of each y
 ```{r}
 library(lubridate)
 library(tidyr)
+library(scales)
 
 # Create a new data frame containing annual data.
 df |>
@@ -202,25 +232,20 @@ df |>
   ) |>
   filter(month(Date) == 12) -> df_an
 
-ggplot(df_an) +
+g1 <- ggplot(df_an) +
   geom_col(aes(x = Date,
                y = Values,
                fill = Categories)) + 
-  labs(title = "Proportion of annual National Employment, 1995-2023", 
+  labs(title = NULL, 
        x = NULL,
        y = NULL,
        fill = NULL) + 
   theme(legend.position = c(0.01, 0.99), legend.justification = c(0, 1))
-```
 
-# Scatter Plot
-
-Now we plot the relationship between Domestic employment and National employment.
-```{r}
 mdl <- lm(`National employment` ~ `Domestic employment`, data = df)
 slope <- coef(mdl)[2]
 
-df |> 
+g2 <- df |> 
   ggplot(aes(x = `Domestic employment`, y = `National employment`)) +
   geom_point(color = "red", size = 0.8) +
   geom_smooth(method = "lm", se = TRUE) +  # Add linear regression line
@@ -228,8 +253,69 @@ df |>
            label = paste("Slope: ", round(slope, 3)),
            hjust = 1, vjust = 1) +
   labs(x = "Domestic employment",
-       y = "National employment")
+       y = "National employment") + 
+  theme(text = element_text(size = 11))
+
+na_prop <- mean(df$`National employment` / df$`Domestic wage-earners`)
+ot_prop <- 1 - na_prop
+
+df_prop <- data.frame(
+  Category = c("National Employment", "Other Employment"),
+  prop = c(na_prop, ot_prop)
+)
+
+na_prop <- mean(df$`National employment` / df$`Domestic wage-earners`)
+ot_prop <- 1 - na_prop
+
+df_prop <- data.frame(
+  Category = c("National Employment", "Other Employment"),
+  prop = c(percent(na_prop, accuracy = 1), percent(ot_prop, accuracy = 1))
+)
+
+g3 <- ggplot(df_prop, aes(x = "", y = prop, fill = Category)) +
+  geom_col() +
+  geom_text(aes(label = ""),
+            position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") + 
+  labs(title = "Average Proportion",
+       fill = NULL,
+       x = NULL,
+       y = NULL) + 
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+grid.arrange(
+  g1, g2, g3,
+  layout_matrix = rbind(c(1,2), c(1,3)),
+  ncol = 2
+)
 ```
+```{r}
+library(scales)
+
+na_prop <- mean(df$`National employment` / df$`Domestic wage-earners`)
+ot_prop <- 1 - na_prop
+
+df_prop <- data.frame(
+  Category = c("National Employment", "Other Employment"),
+  prop = c(percent(na_prop, accuracy = 1), percent(ot_prop, accuracy = 1))
+)
+
+g3 <- ggplot(df_prop, aes(x = "", y = prop, fill = Category)) +
+  geom_col() +
+  geom_text(aes(label = ""),
+            position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") + 
+  labs(title = "Average Proportion",
+       fill = NULL,
+       x = NULL,
+       y = NULL) + 
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+
 
 # Distribution
 
@@ -239,14 +325,14 @@ df$`Unemployment rate` <- df$`Number of unemployed` / df$`Active population`
 
 df |> 
   ggplot(aes(x = cut(Date, breaks = "5 years"), y = `Unemployment rate`, group = cut(Date, breaks = "5 years"))) + 
-  geom_boxplot() + 
+  geom_boxplot(fill = "skyblue2", outlier.color="red") + 
   scale_x_discrete(labels = function(x) {
     interval_start <- as.Date(x, format = "%Y-%m-%d")
     interval_end <- interval_start + lubridate::years(5) - lubridate::days(1)
     sprintf("%s - %s", format(interval_start, "%Y"), format(interval_end, "%Y"))
   }) +
   labs(title = "Unemployment Rate in Luxembourg", 
-       x = "Year Interval", 
-       y = "Unemployment Rate")
+       x = NULL, 
+       y = NULL)
 ```
 This takes out the seasonal effects.

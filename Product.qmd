@@ -84,7 +84,7 @@ theme(
 
 ## Line Graph
 
-[Shiny App](http://127.0.0.1:4328/)
+[Shiny App](http://127.0.0.1:4328)
 
 ```{r}
 df_rs <- read.xlsx("data_reshaped.xlsx")
@@ -95,17 +95,6 @@ colnames(df_rs) <- c("Category", "Date","Value")
 # Convert date column to Date format
 df_rs$Date <- as.numeric(df_rs$Date)
 df_rs$Date <- as.Date(df_rs$Date, origin = "1899-12-30")
-
-# Show first 10 rows
-head(df_rs, n = 10)
-```
-
-```{r}
-ggplot(df_rs, aes(x = Date, y = Value)) + 
-  geom_line(aes(color = Category)) + 
-  labs(x = NULL, 
-       y = NULL, 
-       color = NULL)
 ```
 
 ```{r}
@@ -142,7 +131,6 @@ df_rs |>
 
 ## Unemployment Rates
 
-But mainly, we are interested in Unemployment Rates.
 Unemployment rates = Number of unemployment / Active population
 
 ```{r}

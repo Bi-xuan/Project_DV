@@ -16,7 +16,8 @@ df_rs$Date <- as.Date(df_rs$Date, origin = "1899-12-30")
 ui <- fluidPage(selectInput(inputId = "Category", 
                             label = "Choose an Entry", 
                             choices = df_rs$Category[!duplicated(df_rs$Category)], 
-                            multiple = TRUE), 
+                            multiple = TRUE,
+                            selected = "Number of unemployed"), 
                 plotOutput("line"))
 
 server <- function(input, output) {

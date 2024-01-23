@@ -84,7 +84,7 @@ theme(
 
 ## Line Graph
 
-[Shiny App](http://127.0.0.1:4328)
+[Interactive](http://127.0.0.1:4328)
 
 ```{r}
 df_rs <- read.xlsx("data_reshaped.xlsx")
